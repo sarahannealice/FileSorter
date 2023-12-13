@@ -26,6 +26,10 @@ std::string FileSorter::get_indexed(const std::string& line) const {
 
 //-----------ANNOYING-----------//
 bool FileSorter::elements_in_sublist(const std::string& first, const std::string& last) const {
+    std::cout << "first of first: " << get_indexed(peek(first)) << std::endl;
+    std::cout << "first of last: " << get_indexed(peek(last)) << std::endl;
+    std::cout << "comparison of both: " << (get_indexed(peek(first)) >= get_indexed(peek(last))) << std::endl;
+
     return !empty(first) && (get_indexed(peek(first)) >= get_indexed(peek(last)));
 }
 
@@ -51,12 +55,77 @@ bool FileSorter::elements_not_in_current_list(const std::string& first, const st
 }
 //-----------ANNOYING-----------//
 
+// compare datasets
+// 0 = same, 1 = less than, 2 = greater than
+int FileSorter::compare(std::string data1, std::string data2) const {
+    int compare_value;
+    bool compared = false;
+    std::string temp1 = data1;
+    std::string temp2 = data2;
+    int num = 0;
+
+    std::cout << data1 << std::endl;
+
+    // checks if data is employee number
+    // removes W if so
+    if (this->index == 0) {
+        temp1 = data1.erase(0, 1);
+        temp2 = data2.erase(0, 1);
+    }
+    std::cout << data1 << std::endl;
+
+    // checks if data is address
+    // extracts numbers if so
+    if (this->index == 3) {
+        std::cout << data1 << std::endl;
+        for (auto n : data1) {
+            if (isdigit(n)) temp1 += n;
+        }
+        std::cout << temp1 << std::endl;
+
+        for (auto n : data2) {
+            if (isdigit(n)) temp2 += n;
+        }
+    }
+
+    while (!compared) {
+        std::cout << (temp1 < temp2) << std::endl;
+        // compares digits
+        if (isdigit(temp1[num])) {
+            if ((int)temp1[num] < (int)temp2[num]) {
+                compare_value = 1;
+                compared = true;
+            } else if ((int)data1[num] > (int)data2[num]) {
+                compare_value = 2;
+                compared = true;
+            } else {
+                num++;
+                continue;
+            }
+        }
+
+        // compares alpha letters
+        if (data1[num] < data2[num]) {
+            compare_value = 1;
+            compared = true;
+        } else if (data1[num] > data2[num]) {
+            compare_value = 2;
+            compared = true;
+        } else {
+            num++;
+            continue;
+        }
+    }
+}
+
+
 // merge files until sorted
 int FileSorter::merge() {
     int num_subfiles = 0;
 
     // which file starts the process
-    auto first = empty(this->split2) || get_indexed(peek(this->split1)) < get_indexed(peek(this->split2)) ? this->split1 : this->split2;
+    auto first = empty(this->split2) || get_indexed(peek(this->split1)) < get_indexed(peek(this->split2)) ?
+            this->split1 : this->split2;
     auto second = first == this->split1 ? this->split2 : this->split1;
 
     // keep merging while there are records left
@@ -98,7 +167,7 @@ void FileSorter::split() const {
         auto curr_data = get_indexed(curr);
         auto prev_data = get_indexed(prev);
 
-        if (!prev.empty() &&  curr_data < prev_data) num_subfiles++;
+        if (!prev.empty() && get_indexed(curr) < get_indexed(prev)) num_subfiles++;
 
         // writes out odds and evens
         if (num_subfiles % 2 == 0) {

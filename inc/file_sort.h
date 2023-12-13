@@ -20,10 +20,10 @@ public:
     void split() const;
     int merge();
 
-    [[nodiscard]] std::string get_indexed(const std::string&) const;
-
     void remove_temp_files() const;
 
+    [[nodiscard]] int compare(std::string, std::string) const;
+    [[nodiscard]] std::string get_indexed(const std::string&) const;
     [[nodiscard]] bool elements_in_sublist(const std::string&, const std::string&) const;
     [[nodiscard]] bool elements_in_column(const std::string&, const std::string&, const std::string&) const;
     [[nodiscard]] static bool elements_not_in_current_list(const std::string&, const std::string&, const std::string&);
